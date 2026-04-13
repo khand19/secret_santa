@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/usr/local/opt/node@20/bin/npm install:*)"
+    ]
+  }
+}

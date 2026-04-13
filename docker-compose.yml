@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: ./backend
+    restart: always
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      - db_data:/app/app.db
+      - uploads_data:/app/uploads
+    expose:
+      - "8000"
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+  uploads_data:
