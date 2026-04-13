@@ -1,5 +1,5 @@
 import { useState, ChangeEvent, FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { authApi } from "../api/client";
 
 const inputStyle: React.CSSProperties = {
@@ -14,7 +14,6 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function RegisterPage() {
-  const navigate = useNavigate();
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
