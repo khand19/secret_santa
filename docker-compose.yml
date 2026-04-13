@@ -4,8 +4,9 @@ services:
     restart: always
     environment:
       - SECRET_KEY=${SECRET_KEY}
+      - DB_PATH=/app/data/app.db
     volumes:
-      - db_data:/app/app.db
+      - db_data:/app/data
       - uploads_data:/app/uploads
     expose:
       - "8000"
