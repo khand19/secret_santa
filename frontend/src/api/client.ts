@@ -162,6 +162,13 @@ export const adminApi = {
   toggleAdmin: (id: number) =>
     request<User>(`/admin/users/${id}/toggle-admin`, { method: "PATCH" }),
 
+  invite: (email: string, name: string) => {
+    const form = new FormData();
+    form.append("email", email);
+    form.append("name", name);
+    return request<{ message: string }>("/admin/invite", { method: "POST", body: form });
+  },
+
   resetPassword: (id: number, password: string) => {
     const form = new FormData();
     form.append("password", password);

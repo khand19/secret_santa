@@ -16,7 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 type FilterStatus = "pending" | "approved" | "rejected" | "all";
-type Tab = "users" | "all-users" | "santa";
+type Tab = "users" | "all-users" | "santa" | "invite";
 
 // ─── Users tab ────────────────────────────────────────────────────────────────
 
@@ -284,6 +284,66 @@ function AllUsersTab() {
   );
 }
 
+// ─── Invite tab ───────────────────────────────────────────────────────────────
+
+function InviteTab() {
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    try {
+      await adminApi.invite(email, name);
+      setSuccess(true);
+      setEmail("");
+      setName("");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ maxWidth: 400 }}>
+      <p style={{ margin: "0 0 20px", fontSize: 14, color: "#6b7280" }}>
+        Envoie une invitation par email à quelqu'un pour qu'il rejoigne l'app.
+      </p>
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div>
+          <label style={{ fontSize: 13, fontWeight: 500, display: "block", marginBottom: 4 }}>Prénom</label>
+          <input
+            style={{ display: "block", width: "100%", padding: "8px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 14, boxSizing: "border-box" }}
+            value={name} onChange={(e) => setName(e.target.value)} required placeholder="Prénom de la personne"
+          />
+        </div>
+        <div>
+          <label style={{ fontSize: 13, fontWeight: 500, display: "block", marginBottom: 4 }}>Email</label>
+          <input
+            type="email"
+            style={{ display: "block", width: "100%", padding: "8px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 14, boxSizing: "border-box" }}
+            value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="email@exemple.com"
+          />
+        </div>
+        {error && <p style={{ margin: 0, fontSize: 13, color: "#ef4444" }}>{error}</p>}
+        {success && <p style={{ margin: 0, fontSize: 13, color: "#10b981", fontWeight: 600 }}>✓ Invitation envoyée !</p>}
+        <button
+          type="submit" disabled={loading}
+          style={{ padding: "10px", background: "#4f46e5", color: "#fff", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+        >
+          {loading ? "Envoi..." : "Envoyer l'invitation"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 // ─── Secret Santa tab ─────────────────────────────────────────────────────────
 
 function SantaTab() {
@@ -415,11 +475,13 @@ export default function AdminPage() {
         <button style={tabStyle(tab === "users")} onClick={() => setTab("users")}>Inscriptions</button>
         <button style={tabStyle(tab === "all-users")} onClick={() => setTab("all-users")}>Utilisateurs</button>
         <button style={tabStyle(tab === "santa")} onClick={() => setTab("santa")}>🎅 Secret Santa</button>
+        <button style={tabStyle(tab === "invite")} onClick={() => setTab("invite")}>✉️ Inviter</button>
       </div>
 
       {tab === "users" && <UsersTab />}
       {tab === "all-users" && <AllUsersTab />}
       {tab === "santa" && <SantaTab />}
+      {tab === "invite" && <InviteTab />}
     </div>
   );
 }

@@ -7,6 +7,7 @@ from ..models import User, UserStatus
 from ..schemas import UserResponse
 from ..dependencies import get_admin_user
 from ..security import hash_password
+from ..email import send_account_approved, send_invitation
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -38,6 +39,7 @@ def approve_user(
     user.status = UserStatus.approved
     db.commit()
     db.refresh(user)
+    send_account_approved(user.email, user.first_name)
     return user
 
 
@@ -71,6 +73,17 @@ def toggle_admin(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.post("/invite")
+def invite_user(
+    email: str = Form(...),
+    name: str = Form(...),
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_admin_user),
+):
+    send_invitation(email, name, f"{current_admin.first_name} {current_admin.last_name}")
+    return {"message": "Invitation envoyée"}
 
 
 @router.patch("/users/{user_id}/password", response_model=UserResponse)

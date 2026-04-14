@@ -9,6 +9,7 @@ from ..models import User, UserStatus
 from ..schemas import UserResponse
 from ..dependencies import get_current_user
 from ..security import hash_password, verify_password
+from ..email import send_new_registration
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -57,6 +58,12 @@ async def register(
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    # Notifier les admins
+    admins = db.query(User).filter(User.is_admin == True).all()
+    for admin in admins:
+        send_new_registration(admin.email, user.first_name, user.last_name, user.email)
+
     return user
 
 

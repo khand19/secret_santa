@@ -14,6 +14,7 @@ from ..schemas import (
 )
 from ..dependencies import get_current_user, get_admin_user
 from ..draw import draw_secret_santa
+from ..email import send_santa_result
 
 admin_router = APIRouter(prefix="/admin/santas", tags=["admin-santa"])
 user_router = APIRouter(prefix="/santas", tags=["santa"])
@@ -262,6 +263,18 @@ def do_draw(
     santa.status = "drawn"
     db.commit()
     db.refresh(santa)
+
+    # Envoyer les résultats par email
+    for p in santa.participants:
+        if p.assigned_to:
+            send_santa_result(
+                participant_email=p.user.email,
+                participant_first=p.user.first_name,
+                assigned_first=p.assigned_to.first_name,
+                assigned_last=p.assigned_to.last_name,
+                santa_name=santa.name,
+            )
+
     return SecretSantaDetailResponse(**_build_detail(santa))
 
 
