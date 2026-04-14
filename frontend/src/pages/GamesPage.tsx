@@ -155,8 +155,21 @@ function BeloteGame({ users, onDone }: { users: User[]; onDone: () => void }) {
   const [cartes, setCartes] = useState(["", ""]);
   const [annonces, setAnnonces] = useState<[AnnoncesState, AnnoncesState]>([{ total: 0, belote: false }, { total: 0, belote: false }]);
 
+  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const [editVals, setEditVals] = useState({ nous_cartes: "", eux_cartes: "", nous_ann: "", eux_ann: "" });
+
   const totals = rounds.reduce((acc, r) => [acc[0] + r.nous_cartes + r.nous_ann, acc[1] + r.eux_cartes + r.eux_ann], [0, 0]);
   const winner = totals[0] >= target ? 0 : totals[1] >= target ? 1 : null;
+
+  function startEdit(i: number) {
+    const r = rounds[i];
+    setEditVals({ nous_cartes: String(r.nous_cartes), eux_cartes: String(r.eux_cartes), nous_ann: String(r.nous_ann), eux_ann: String(r.eux_ann) });
+    setEditIdx(i);
+  }
+  function saveEdit(i: number) {
+    setRounds((rs) => rs.map((r, j) => j !== i ? r : { nous_cartes: parseInt(editVals.nous_cartes) || 0, eux_cartes: parseInt(editVals.eux_cartes) || 0, nous_ann: parseInt(editVals.nous_ann) || 0, eux_ann: parseInt(editVals.eux_ann) || 0 }));
+    setEditIdx(null);
+  }
 
   function setCarteWithMirror(idx: number, v: string) {
     const n = parseInt(v);
@@ -178,7 +191,7 @@ function BeloteGame({ users, onDone }: { users: User[]; onDone: () => void }) {
   }
 
   function capot(t: number) {
-    setRounds((r) => [...r, t === 0 ? { nous_cartes: 252, eux_cartes: 0, nous_ann: 0, eux_ann: 0 } : { nous_cartes: 0, eux_cartes: 252, nous_ann: 0, eux_ann: 0 }]);
+    setRounds((r) => [...r, t === 0 ? { nous_cartes: 250, eux_cartes: 0, nous_ann: 0, eux_ann: 0 } : { nous_cartes: 0, eux_cartes: 250, nous_ann: 0, eux_ann: 0 }]);
   }
 
   function finish() {
@@ -286,15 +299,29 @@ function BeloteGame({ users, onDone }: { users: User[]; onDone: () => void }) {
                 <th style={{ padding: "3px 6px", textAlign: "right" }}>{names[0]} ann.</th>
                 <th style={{ padding: "3px 6px", textAlign: "right" }}>{names[1]} cartes</th>
                 <th style={{ padding: "3px 6px", textAlign: "right" }}>{names[1]} ann.</th>
+                <th />
               </tr></thead>
               <tbody>
-                {rounds.map((r, i) => (
+                {rounds.map((r, i) => editIdx === i ? (
+                  <tr key={i} style={{ borderTop: "1px solid #f3f4f6", background: "#fafaf9" }}>
+                    <td style={{ padding: "3px 6px", color: "#9ca3af" }}>{i + 1}</td>
+                    <td style={{ padding: "2px 4px" }}><input type="number" value={editVals.nous_cartes} onChange={(e) => setEditVals((v) => ({ ...v, nous_cartes: e.target.value }))} style={{ width: 48, border: "1px solid #6366f1", borderRadius: 4, padding: "2px 4px", fontSize: 12, textAlign: "right" }} /></td>
+                    <td style={{ padding: "2px 4px" }}><input type="number" value={editVals.nous_ann} onChange={(e) => setEditVals((v) => ({ ...v, nous_ann: e.target.value }))} style={{ width: 42, border: "1px solid #7c3aed", borderRadius: 4, padding: "2px 4px", fontSize: 12, textAlign: "right" }} /></td>
+                    <td style={{ padding: "2px 4px" }}><input type="number" value={editVals.eux_cartes} onChange={(e) => setEditVals((v) => ({ ...v, eux_cartes: e.target.value }))} style={{ width: 48, border: "1px solid #6366f1", borderRadius: 4, padding: "2px 4px", fontSize: 12, textAlign: "right" }} /></td>
+                    <td style={{ padding: "2px 4px" }}><input type="number" value={editVals.eux_ann} onChange={(e) => setEditVals((v) => ({ ...v, eux_ann: e.target.value }))} style={{ width: 42, border: "1px solid #7c3aed", borderRadius: 4, padding: "2px 4px", fontSize: 12, textAlign: "right" }} /></td>
+                    <td style={{ padding: "2px 4px", whiteSpace: "nowrap" }}>
+                      <button onClick={() => saveEdit(i)} style={{ border: "none", background: "#4f46e5", color: "#fff", borderRadius: 4, padding: "2px 6px", fontSize: 11, cursor: "pointer", marginRight: 2 }}>✓</button>
+                      <button onClick={() => setEditIdx(null)} style={{ border: "none", background: "#e5e7eb", color: "#374151", borderRadius: 4, padding: "2px 6px", fontSize: 11, cursor: "pointer" }}>✕</button>
+                    </td>
+                  </tr>
+                ) : (
                   <tr key={i} style={{ borderTop: "1px solid #f3f4f6" }}>
                     <td style={{ padding: "3px 6px", color: "#9ca3af" }}>{i + 1}</td>
                     <td style={{ padding: "3px 6px", textAlign: "right", fontWeight: 600 }}>{r.nous_cartes}</td>
                     <td style={{ padding: "3px 6px", textAlign: "right", color: r.nous_ann > 0 ? "#7c3aed" : "#9ca3af" }}>{r.nous_ann > 0 ? `+${r.nous_ann}` : "—"}</td>
                     <td style={{ padding: "3px 6px", textAlign: "right", fontWeight: 600 }}>{r.eux_cartes}</td>
                     <td style={{ padding: "3px 6px", textAlign: "right", color: r.eux_ann > 0 ? "#7c3aed" : "#9ca3af" }}>{r.eux_ann > 0 ? `+${r.eux_ann}` : "—"}</td>
+                    <td style={{ padding: "3px 6px" }}><button onClick={() => startEdit(i)} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#9ca3af" }}>✏️</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -321,14 +348,14 @@ interface CoincheRound {
 }
 
 const COINCHE_MULT: Record<CoincheMult, number> = { normal: 1, coinche: 2, surcoinche: 4 };
-const BIDS = [80, 90, 100, 110, 120, 130, 140, 150, 160, 250];
+const BIDS = [80, 90, 100, 110, 120, 130, 140, 150, 160];
 const TRUMPS: TrumpColor[] = ["♠", "♥", "♦", "♣", "SA", "TA"];
 
 function CoincheGame({ users, onDone }: { users: User[]; onDone: () => void }) {
   const [teams, setTeams] = useState<[GamePlayer[], GamePlayer[]]>([[], []]);
   const [names, setNames] = useState(["Nous", "Eux"]);
   const [rounds, setRounds] = useState<CoincheRound[]>([]);
-  const [target, setTarget] = useState(2000);
+  const [target, setTarget] = useState(3000);
   const [setup, setSetup] = useState(true);
 
   // Saisie manche
@@ -351,6 +378,11 @@ function CoincheGame({ users, onDone }: { users: User[]; onDone: () => void }) {
 
   const totals = rounds.reduce((acc, r) => [acc[0] + r.ann[0], acc[1] + r.ann[1]], [0, 0]);
   const winner = totals[0] >= target ? 0 : totals[1] >= target ? 1 : null;
+  const [editCIdx, setEditCIdx] = useState<number | null>(null);
+  const [editCVals, setEditCVals] = useState(["", ""]);
+
+  function startEditC(i: number) { setEditCVals([String(rounds[i].ann[0]), String(rounds[i].ann[1])]); setEditCIdx(i); }
+  function saveEditC(i: number) { setRounds((rs) => rs.map((r, j) => j !== i ? r : { ...r, ann: [parseInt(editCVals[0]) || 0, parseInt(editCVals[1]) || 0] as [number, number] })); setEditCIdx(null); }
 
   function addRound() {
     const c0 = parseInt(cartes[0]) || 0;
@@ -398,7 +430,7 @@ function CoincheGame({ users, onDone }: { users: User[]; onDone: () => void }) {
         ))}
         <div>
           <label style={{ fontSize: 13, color: "#6b7280", display: "block", marginBottom: 4 }}>Score cible</label>
-          <Input value={target} onChange={(v) => setTarget(parseInt(v) || 2000)} type="number" style={{ width: 120 }} />
+          <Input value={target} onChange={(v) => setTarget(parseInt(v) || 3000)} type="number" style={{ width: 120 }} />
         </div>
         <Btn onClick={() => setSetup(false)} disabled={teams[0].length === 0 || teams[1].length === 0}>Commencer →</Btn>
       </div>
@@ -521,15 +553,29 @@ function CoincheGame({ users, onDone }: { users: User[]; onDone: () => void }) {
                 <th style={{ padding: "3px 5px" }}>Contrat</th>
                 <th style={{ padding: "3px 5px", textAlign: "right" }}>{names[0]}</th>
                 <th style={{ padding: "3px 5px", textAlign: "right" }}>{names[1]}</th>
+                <th />
               </tr></thead>
               <tbody>
-                {rounds.map((r, i) => (
+                {rounds.map((r, i) => editCIdx === i ? (
+                  <tr key={i} style={{ borderTop: "1px solid #f3f4f6", background: "#fafaf9" }}>
+                    <td style={{ padding: "3px 5px", color: "#9ca3af" }}>{i + 1}</td>
+                    <td style={{ padding: "3px 5px", fontWeight: 600 }}>{names[r.preneur]}</td>
+                    <td style={{ padding: "3px 5px", fontSize: 11 }}>{r.bid === 250 ? "Capot" : r.bid}{r.trump}</td>
+                    <td style={{ padding: "2px 4px" }}><input type="number" value={editCVals[0]} onChange={(e) => setEditCVals((v) => [e.target.value, v[1]])} style={{ width: 52, border: "1px solid #6366f1", borderRadius: 4, padding: "2px 4px", fontSize: 12, textAlign: "right" }} /></td>
+                    <td style={{ padding: "2px 4px" }}><input type="number" value={editCVals[1]} onChange={(e) => setEditCVals((v) => [v[0], e.target.value])} style={{ width: 52, border: "1px solid #6366f1", borderRadius: 4, padding: "2px 4px", fontSize: 12, textAlign: "right" }} /></td>
+                    <td style={{ padding: "2px 4px", whiteSpace: "nowrap" }}>
+                      <button onClick={() => saveEditC(i)} style={{ border: "none", background: "#4f46e5", color: "#fff", borderRadius: 4, padding: "2px 6px", fontSize: 11, cursor: "pointer", marginRight: 2 }}>✓</button>
+                      <button onClick={() => setEditCIdx(null)} style={{ border: "none", background: "#e5e7eb", color: "#374151", borderRadius: 4, padding: "2px 6px", fontSize: 11, cursor: "pointer" }}>✕</button>
+                    </td>
+                  </tr>
+                ) : (
                   <tr key={i} style={{ borderTop: "1px solid #f3f4f6" }}>
                     <td style={{ padding: "3px 5px", color: "#9ca3af" }}>{i + 1}</td>
                     <td style={{ padding: "3px 5px", fontWeight: 600 }}>{names[r.preneur]}</td>
                     <td style={{ padding: "3px 5px" }}>{r.bid === 250 ? "Capot" : r.bid}{r.trump} {r.mult !== "normal" ? `×${COINCHE_MULT[r.mult]}` : ""}</td>
                     <td style={{ padding: "3px 5px", textAlign: "right", fontWeight: 700, color: r.ann[0] > 0 ? "#15803d" : "#9ca3af" }}>{r.ann[0] > 0 ? `+${r.ann[0]}` : "0"}</td>
                     <td style={{ padding: "3px 5px", textAlign: "right", fontWeight: 700, color: r.ann[1] > 0 ? "#15803d" : "#9ca3af" }}>{r.ann[1] > 0 ? `+${r.ann[1]}` : "0"}</td>
+                    <td style={{ padding: "3px 5px" }}><button onClick={() => startEditC(i)} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#9ca3af" }}>✏️</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -620,6 +666,11 @@ function TarotGame({ users, onDone }: { users: User[]; onDone: () => void }) {
 
   const nb = players.length;
   const totals = rounds.reduce((acc, r) => acc.map((v, i) => v + r.scores[i]), Array(nb).fill(0));
+  const [editTIdx, setEditTIdx] = useState<number | null>(null);
+  const [editTVals, setEditTVals] = useState<string[]>([]);
+
+  function startEditT(i: number) { setEditTVals(rounds[i].scores.map(String)); setEditTIdx(i); }
+  function saveEditT(i: number) { setRounds((rs) => rs.map((r, j) => j !== i ? r : { ...r, scores: editTVals.map((v) => parseInt(v) || 0) })); setEditTIdx(null); }
 
   function addRound() {
     const pts = parseInt(entry.points);
@@ -778,9 +829,26 @@ function TarotGame({ users, onDone }: { users: User[]; onDone: () => void }) {
                 <th style={{ padding: "3px 5px" }}>Contrat</th>
                 {players.map((p) => <th key={p.id} style={{ padding: "3px 5px" }}>{p.name.split(" ")[0]}</th>)}
                 <th style={{ padding: "3px 5px" }}>+</th>
+                <th />
               </tr></thead>
               <tbody>
-                {rounds.map((r, i) => (
+                {rounds.map((r, i) => editTIdx === i ? (
+                  <tr key={i} style={{ borderTop: "1px solid #f3f4f6", background: "#fafaf9" }}>
+                    <td style={{ padding: "3px 5px", color: "#9ca3af" }}>{i + 1}</td>
+                    <td style={{ padding: "3px 5px", fontWeight: 600 }}>{players[r.preneur]?.name.split(" ")[0]}</td>
+                    <td style={{ padding: "3px 5px", fontSize: 11 }}>{BID_LABELS[r.bid].split(" ")[0]}</td>
+                    {editTVals.map((v, j) => (
+                      <td key={j} style={{ padding: "2px 3px" }}>
+                        <input type="number" value={v} onChange={(e) => setEditTVals((vals) => vals.map((x, k) => k === j ? e.target.value : x))} style={{ width: 46, border: "1px solid #6366f1", borderRadius: 4, padding: "2px 3px", fontSize: 12, textAlign: "right" }} />
+                      </td>
+                    ))}
+                    <td />
+                    <td style={{ padding: "2px 4px", whiteSpace: "nowrap" }}>
+                      <button onClick={() => saveEditT(i)} style={{ border: "none", background: "#4f46e5", color: "#fff", borderRadius: 4, padding: "2px 6px", fontSize: 11, cursor: "pointer", marginRight: 2 }}>✓</button>
+                      <button onClick={() => setEditTIdx(null)} style={{ border: "none", background: "#e5e7eb", color: "#374151", borderRadius: 4, padding: "2px 6px", fontSize: 11, cursor: "pointer" }}>✕</button>
+                    </td>
+                  </tr>
+                ) : (
                   <tr key={i} style={{ borderTop: "1px solid #f3f4f6" }}>
                     <td style={{ padding: "3px 5px", color: "#9ca3af" }}>{i + 1}</td>
                     <td style={{ padding: "3px 5px", fontWeight: 600 }}>{players[r.preneur]?.name.split(" ")[0]}</td>
@@ -791,6 +859,7 @@ function TarotGame({ users, onDone }: { users: User[]; onDone: () => void }) {
                     <td style={{ padding: "3px 5px", fontSize: 11, color: "#9ca3af" }}>
                       {r.poignee !== "none" ? "P" : ""}{r.petit_au_bout !== "none" ? "pb" : ""}{r.chelem !== "none" ? "Ch" : ""}
                     </td>
+                    <td style={{ padding: "3px 5px" }}><button onClick={() => startEditT(i)} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#9ca3af" }}>✏️</button></td>
                   </tr>
                 ))}
                 <tr style={{ borderTop: "2px solid #e5e7eb", fontWeight: 800 }}>
@@ -825,6 +894,11 @@ function PapayooGame({ users, onDone }: { users: User[]; onDone: () => void }) {
   const nb = players.length;
   const totals = rounds.reduce((acc, r) => acc.map((v, i) => v + r.scores[i]), Array(nb).fill(0));
   const loserIdx = totals.some((t) => t >= target) ? totals.indexOf(Math.max(...totals)) : null;
+  const [editPIdx, setEditPIdx] = useState<number | null>(null);
+  const [editPVals, setEditPVals] = useState<string[]>([]);
+
+  function startEditP(i: number) { setEditPVals(rounds[i].scores.map(String)); setEditPIdx(i); }
+  function saveEditP(i: number) { setRounds((rs) => rs.map((r, j) => j !== i ? r : { scores: editPVals.map((v) => parseInt(v) || 0) })); setEditPIdx(null); }
 
   function addRound() {
     setRounds((r) => [...r, { scores: entry.slice(0, nb).map((v) => parseInt(v) || 0) }]);
@@ -887,12 +961,27 @@ function PapayooGame({ users, onDone }: { users: User[]; onDone: () => void }) {
               <thead><tr style={{ color: "#9ca3af" }}>
                 <th style={{ padding: "3px 5px", textAlign: "left" }}>#</th>
                 {players.map((p) => <th key={p.id} style={{ padding: "3px 5px" }}>{p.name.split(" ")[0]}</th>)}
+                <th />
               </tr></thead>
               <tbody>
-                {rounds.map((r, i) => (
+                {rounds.map((r, i) => editPIdx === i ? (
+                  <tr key={i} style={{ borderTop: "1px solid #f3f4f6", background: "#fafaf9" }}>
+                    <td style={{ padding: "3px 5px", color: "#9ca3af" }}>{i + 1}</td>
+                    {editPVals.map((v, j) => (
+                      <td key={j} style={{ padding: "2px 3px" }}>
+                        <input type="number" value={v} onChange={(e) => setEditPVals((vals) => vals.map((x, k) => k === j ? e.target.value : x))} style={{ width: 46, border: "1px solid #6366f1", borderRadius: 4, padding: "2px 3px", fontSize: 12, textAlign: "right" }} />
+                      </td>
+                    ))}
+                    <td style={{ padding: "2px 4px", whiteSpace: "nowrap" }}>
+                      <button onClick={() => saveEditP(i)} style={{ border: "none", background: "#4f46e5", color: "#fff", borderRadius: 4, padding: "2px 6px", fontSize: 11, cursor: "pointer", marginRight: 2 }}>✓</button>
+                      <button onClick={() => setEditPIdx(null)} style={{ border: "none", background: "#e5e7eb", color: "#374151", borderRadius: 4, padding: "2px 6px", fontSize: 11, cursor: "pointer" }}>✕</button>
+                    </td>
+                  </tr>
+                ) : (
                   <tr key={i} style={{ borderTop: "1px solid #f3f4f6" }}>
                     <td style={{ padding: "3px 5px", color: "#9ca3af" }}>{i + 1}</td>
                     {r.scores.map((s, j) => <td key={j} style={{ padding: "3px 5px", fontWeight: 600 }}>{s}</td>)}
+                    <td style={{ padding: "3px 5px" }}><button onClick={() => startEditP(i)} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#9ca3af" }}>✏️</button></td>
                   </tr>
                 ))}
                 <tr style={{ borderTop: "2px solid #e5e7eb", fontWeight: 800 }}>
