@@ -5,6 +5,9 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DB_PATH=/app/data/app.db
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - APP_URL=${APP_URL}
     volumes:
       - db_data:/app/data
       - uploads_data:/app/uploads

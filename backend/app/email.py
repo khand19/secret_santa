@@ -1,33 +1,28 @@
 import os
-import boto3
-from botocore.exceptions import ClientError
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-SENDER = os.getenv("SES_SENDER", "kevin.l.laurent@gmail.com")
-AWS_REGION = os.getenv("AWS_REGION", "eu-west-1")
+SENDER = os.getenv("GMAIL_USER", "kevin.l.laurent@gmail.com")
+APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
 APP_URL = os.getenv("APP_URL", "https://famille-laurent.duckdns.org")
 
 
-def _ses():
-    return boto3.client(
-        "ses",
-        region_name=AWS_REGION,
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-    )
-
-
 def _send(to: str, subject: str, html: str):
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = SENDER
+    msg["To"] = to
+    msg.attach(MIMEText(html, "html", "utf-8"))
+
     try:
-        _ses().send_email(
-            Source=SENDER,
-            Destination={"ToAddresses": [to]},
-            Message={
-                "Subject": {"Data": subject, "Charset": "UTF-8"},
-                "Body": {"Html": {"Data": html, "Charset": "UTF-8"}},
-            },
-        )
-    except ClientError as e:
-        print(f"[SES] Erreur envoi email à {to}: {e}")
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(SENDER, APP_PASSWORD)
+            server.sendmail(SENDER, to, msg.as_string())
+    except Exception as e:
+        print(f"[Gmail] Erreur envoi email à {to}: {e}")
 
 
 # ─── Templates ────────────────────────────────────────────────────────────────
