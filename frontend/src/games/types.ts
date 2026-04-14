@@ -1,6 +1,6 @@
 // ─── Types partagés ───────────────────────────────────────────────────────────
 
-export type GameType = "belote" | "coinche" | "tarot" | "papayoo";
+export type GameType = "belote" | "coinche" | "tarot" | "papayoo" | "qwixx";
 
 export interface GamePlayer { id: number; name: string; avatar: string | null; }
 

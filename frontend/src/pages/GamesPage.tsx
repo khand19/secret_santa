@@ -5,6 +5,7 @@ import BeloteGame from "../games/BeloteGame";
 import CoincheGame from "../games/CoincheGame";
 import TarotGame from "../games/TarotGame";
 import PapayooGame from "../games/PapayooGame";
+import QwixxGame from "../games/QwixxGame";
 import StatsPage from "../games/StatsPage";
 
 const GAMES_LIST = [
@@ -12,9 +13,10 @@ const GAMES_LIST = [
   { id: "coinche" as GameType, label: "Coinche",  icon: "🎯", desc: "2 équipes · Contrat + Coinche/Surcoinche" },
   { id: "tarot"   as GameType, label: "Tarot",    icon: "🔮", desc: "3–5 joueurs · Poignée · Petit au bout · Chelem" },
   { id: "papayoo" as GameType, label: "Papayoo",  icon: "🎴", desc: "3–6 joueurs · Le moins de points gagne" },
+  { id: "qwixx"   as GameType, label: "Qwixx",    icon: "🎲", desc: "2–5 joueurs · Cochez de gauche à droite · Score auto" },
 ];
 
-const ICONS: Record<GameType, string> = { belote: "🃏", coinche: "🎯", tarot: "🔮", papayoo: "🎴" };
+const ICONS: Record<GameType, string> = { belote: "🃏", coinche: "🎯", tarot: "🔮", papayoo: "🎴", qwixx: "🎲" };
 
 export default function GamesPage() {
   const [selected, setSelected] = useState<GameType | null>(null);
@@ -33,6 +35,7 @@ export default function GamesPage() {
       {selected === "coinche" && <CoincheGame users={users} onDone={back} />}
       {selected === "tarot"   && <TarotGame   users={users} onDone={back} />}
       {selected === "papayoo" && <PapayooGame users={users} onDone={back} />}
+      {selected === "qwixx"   && <QwixxGame   users={users} onDone={back} />}
     </div>
   );
 
