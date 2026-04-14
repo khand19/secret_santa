@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { santaUserApi, usersApi, reservationsApi, MyAssignment, MyReservation, PublicWishItem } from "./api/client";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminPage from "./pages/AdminPage";
@@ -10,6 +11,7 @@ import AdminSantaDetail from "./pages/AdminSantaDetail";
 import ProfilePage from "./pages/ProfilePage";
 import UsersPage from "./pages/UsersPage";
 import PersonalPage from "./pages/PersonalPage";
+import GamesPage from "./pages/GamesPage";
 
 // ─── Bouton réservation pour la wishlist Secret Santa ─────────────────────────
 
@@ -224,7 +226,7 @@ function MyReservationsCard() {
 // ─── Page d'accueil ───────────────────────────────────────────────────────────
 
 function HomePage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [assignments, setAssignments] = useState<MyAssignment[]>([]);
 
   useEffect(() => {
@@ -232,25 +234,7 @@ function HomePage() {
   }, []);
 
   return (
-    <div style={{ maxWidth: 640, margin: "40px auto", fontFamily: "sans-serif", padding: "0 16px" }}>
-      {/* Navbar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: 22 }}>Accueil</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <Link to="/users" style={{ fontSize: 13, color: "#4f46e5" }}>Listes de souhaits</Link>
-          <Link to="/profile" style={{ fontSize: 13, color: "#4f46e5" }}>Mon espace</Link>
-          {user?.is_admin && (
-            <Link to="/admin" style={{ fontSize: 13, color: "#4f46e5" }}>Administration</Link>
-          )}
-          <button
-            onClick={logout}
-            style={{ fontSize: 13, background: "none", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 12px", cursor: "pointer" }}
-          >
-            Déconnexion
-          </button>
-        </div>
-      </div>
-
+    <div style={{ maxWidth: 640, margin: "32px auto", fontFamily: "sans-serif", padding: "0 16px" }}>
       {/* Profil */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px", background: "#f9fafb", borderRadius: 8, marginBottom: 32 }}>
         {user?.profile_image ? (
@@ -296,12 +280,13 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminPage /></ProtectedRoute>} />
-          <Route path="/admin/santa/:id" element={<ProtectedRoute requireAdmin><AdminSantaDetail /></ProtectedRoute>} />
-          <Route path="/perso" element={<ProtectedRoute requireAdmin><PersonalPage /></ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute><Layout><HomePage /></Layout></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute><Layout><UsersPage /></Layout></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Layout><ProfilePage /></Layout></ProtectedRoute>} />
+          <Route path="/games" element={<ProtectedRoute><Layout><GamesPage /></Layout></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute requireAdmin><Layout><AdminPage /></Layout></ProtectedRoute>} />
+          <Route path="/admin/santa/:id" element={<ProtectedRoute requireAdmin><Layout><AdminSantaDetail /></Layout></ProtectedRoute>} />
+          <Route path="/perso" element={<ProtectedRoute requireAdmin><Layout><PersonalPage /></Layout></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
