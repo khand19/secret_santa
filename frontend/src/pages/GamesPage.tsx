@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { usersApi, User } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import { GameType } from "../games/types";
 import BeloteGame from "../games/BeloteGame";
 import CoincheGame from "../games/CoincheGame";
@@ -19,6 +20,7 @@ const GAMES_LIST = [
 const ICONS: Record<GameType, string> = { belote: "🃏", coinche: "🎯", tarot: "🔮", papayoo: "🎴", qwixx: "🎲" };
 
 export default function GamesPage() {
+  const { user: currentUser } = useAuth();
   const [selected, setSelected] = useState<GameType | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [tab, setTab] = useState<"games" | "stats">("games");
@@ -35,7 +37,7 @@ export default function GamesPage() {
       {selected === "coinche" && <CoincheGame users={users} onDone={back} />}
       {selected === "tarot"   && <TarotGame   users={users} onDone={back} />}
       {selected === "papayoo" && <PapayooGame users={users} onDone={back} />}
-      {selected === "qwixx"   && <QwixxGame   users={users} onDone={back} />}
+      {selected === "qwixx"   && <QwixxGame   users={users} onDone={back} currentUser={currentUser!} />}
     </div>
   );
 
