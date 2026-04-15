@@ -7,6 +7,7 @@ import CoincheGame from "../games/CoincheGame";
 import TarotGame from "../games/TarotGame";
 import PapayooGame from "../games/PapayooGame";
 import QwixxGame from "../games/QwixxGame";
+import UndercoverGame from "../games/UndercoverGame";
 import StatsPage from "../games/StatsPage";
 
 const GAMES_LIST = [
@@ -15,9 +16,10 @@ const GAMES_LIST = [
   { id: "tarot"   as GameType, label: "Tarot",    icon: "🔮", desc: "3–5 joueurs · Poignée · Petit au bout · Chelem" },
   { id: "papayoo" as GameType, label: "Papayoo",  icon: "🎴", desc: "3–6 joueurs · Le moins de points gagne" },
   { id: "qwixx"   as GameType, label: "Qwixx",    icon: "🎲", desc: "2–5 joueurs · Cochez de gauche à droite · Score auto" },
+  { id: "undercover" as GameType, label: "Undercover", icon: "🕵️", desc: "3–8 joueurs · Civils vs Undercover · Mr. White" },
 ];
 
-const ICONS: Record<GameType, string> = { belote: "🃏", coinche: "🎯", tarot: "🔮", papayoo: "🎴", qwixx: "🎲" };
+const ICONS: Record<GameType, string> = { belote: "🃏", coinche: "🎯", tarot: "🔮", papayoo: "🎴", qwixx: "🎲", undercover: "🕵️" };
 
 export default function GamesPage() {
   const { user: currentUser } = useAuth();
@@ -38,6 +40,7 @@ export default function GamesPage() {
       {selected === "tarot"   && <TarotGame   users={users} onDone={back} />}
       {selected === "papayoo" && <PapayooGame users={users} onDone={back} />}
       {selected === "qwixx"   && <QwixxGame   users={users} onDone={back} currentUser={currentUser!} />}
+      {selected === "undercover" && <UndercoverGame users={users} onDone={back} currentUser={currentUser!} />}
     </div>
   );
 

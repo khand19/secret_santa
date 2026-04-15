@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(/usr/local/opt/node@20/bin/npm install:*)"
+      "Bash(/usr/local/opt/node@20/bin/npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

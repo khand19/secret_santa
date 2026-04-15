@@ -9,6 +9,7 @@ from .routers import items
 from .routers import auth, admin, profile, wishlist, users, reservations, children
 from .routers.secret_santa import admin_router as santa_admin_router, user_router as santa_user_router
 from .routers.qwixx import router as qwixx_router
+from .routers.undercover import router as undercover_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -60,6 +61,7 @@ app.include_router(children.router, prefix="/api")
 app.include_router(santa_admin_router, prefix="/api")
 app.include_router(santa_user_router, prefix="/api")
 app.include_router(qwixx_router, prefix="/api")
+app.include_router(undercover_router, prefix="/api")
 
 
 @app.get("/")
